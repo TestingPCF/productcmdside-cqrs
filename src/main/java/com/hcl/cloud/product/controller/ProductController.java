@@ -1,32 +1,27 @@
 package com.hcl.cloud.product.controller;
 
 import static com.hcl.cloud.product.constants.ProductConstants.ACCESS_TOKEN;
-import static com.hcl.cloud.product.constants.ProductConstants.SKU_CODE;
-import static com.hcl.cloud.product.constants.ProductConstants.VIEW_PRODUCT_BYSKUCODE_URI;
-
-import java.util.List;
 
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hcl.cloud.product.config.RabbitmqConfigProduct;
+import com.hcl.cloud.product.constants.ProductConstants;
 import com.hcl.cloud.product.datatranslator.CreateProductResponseTranslator;
 import com.hcl.cloud.product.datatranslator.DeleteProductResponseTranslator;
 import com.hcl.cloud.product.datatranslator.UpdateProductResponseTranslator;
-import com.hcl.cloud.product.datatranslator.ViewProductbySkuCodeResponseTranslator;
-import com.hcl.cloud.product.datatranslator.ViewProductsResponseTranslator;
 import com.hcl.cloud.product.exception.ProductException;
 import com.hcl.cloud.product.request.CreateproductReq;
 import com.hcl.cloud.product.request.DeleteproductReq;
@@ -35,7 +30,6 @@ import com.hcl.cloud.product.resources.TransactionBean;
 import com.hcl.cloud.product.response.CreateproductRes;
 import com.hcl.cloud.product.response.DeleteproductRes;
 import com.hcl.cloud.product.response.UpdateproductRes;
-import com.hcl.cloud.product.response.ViewproductRes;
 import com.hcl.cloud.product.service.ProductService;
 
 /**
@@ -49,7 +43,9 @@ public class ProductController {
     private ProductService productService;
     @Autowired
     Environment env;
-
+    @Autowired
+	private RabbitTemplate rabbitTemplate;
+    
     public void setEnv(Environment env) {
         this.env = env;
     }
@@ -81,6 +77,12 @@ public class ProductController {
         try {
 
             createproductReq = productService.createProduct(createproductReq, env, txBean);
+            if(ProductConstants.SUCCESS.equals(createproductReq.getStatus())) {
+            	//ProductBean productBean = new ProductBean();
+            	//BeanUtils.copyProperties(productBean, createproductReq);
+            	log.info("Bean has neem copied... "+createproductReq.getProductName());
+            	rabbitTemplate.convertAndSend(RabbitmqConfigProduct.EXCHANGE_NAME,RabbitmqConfigProduct.ROUTING_KEY,createproductReq);
+            }
             createproductRes = cprtrans.createproductresponsetranslator(createproductReq, env);
         } catch (Exception ex) {
             throw new ProductException(ex.getMessage());
@@ -154,7 +156,7 @@ public class ProductController {
      * @param skuCode
      * @return ResponseEntity
      * @throws ProductException
-     */
+     *
     @RequestMapping(method = RequestMethod.GET, value = VIEW_PRODUCT_BYSKUCODE_URI, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ViewproductRes> viewProductBySkuCode(
             @RequestHeader(value = ACCESS_TOKEN, required = true) String accessToken,
@@ -173,7 +175,7 @@ public class ProductController {
         log.info("viewProductBySkuCode call end");
         return ResponseEntity.ok().body(viewproductRes);
 
-    }
+    }*/
 
     /**
      * This method is used for view all active products.
@@ -181,7 +183,7 @@ public class ProductController {
      * @param accessToken
      * @return ResponseEntity
      * @throws ProductException
-     */
+     *
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ViewproductRes> viewProducts(
             @RequestHeader(value = ACCESS_TOKEN, required = true) String accessToken) throws ProductException {
@@ -195,5 +197,5 @@ public class ProductController {
         log.info("viewProducts call end");
         return ResponseEntity.ok().body(viewproductRes);
 
-    }
+    }*/
 }

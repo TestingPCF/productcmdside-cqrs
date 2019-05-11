@@ -9,6 +9,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * 
  * @author Brijendra and Kapil
@@ -39,7 +40,28 @@ public class CreateproductReq  implements Serializable{
     @Transient
     @JsonIgnore
     private String status = null;
-    /**
+    
+    public CreateproductReq() {
+		
+	}
+
+	public CreateproductReq(@JsonProperty String skuCode, @JsonProperty String productName, @JsonProperty Integer salePrice,
+			@JsonProperty Integer listPrice, @JsonProperty String productDescrition, @JsonProperty String category,
+			boolean is_deleted, String status) {
+		super();
+		this.skuCode = skuCode;
+		this.productName = productName;
+		this.salePrice = salePrice;
+		this.listPrice = listPrice;
+		this.productDescrition = productDescrition;
+		this.category = category;
+		this.is_deleted = is_deleted;
+		this.status = status;
+	}
+    
+    
+    
+	/**
      * @return the String
      */
     public String getSkuCode() {
@@ -141,4 +163,13 @@ public class CreateproductReq  implements Serializable{
     public static long getSerialversionuid() {
         return serialVersionUID;
     }
+
+	@Override
+	public String toString() {
+		return "CreateproductReq [skuCode=" + skuCode + ", productName=" + productName + ", salePrice=" + salePrice
+				+ ", listPrice=" + listPrice + ", productDescrition=" + productDescrition + ", category=" + category
+				+ ", is_deleted=" + is_deleted + ", status=" + status + "]";
+	}
+    
+    
 }

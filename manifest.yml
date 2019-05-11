@@ -1,13 +1,12 @@
 --- 
 applications:
- - name: products
+ - name: cqrs-products
    path: target/product-0.0.1-SNAPSHOT.jar
    services: 
-     - dbService
+     - productDB
      - redisservice
-     - log-drain
-     - newrelic
+     - worker-mq
    routes:
-    - route:  products.apps.sandbox.cflab01.in.hclcnlabs.com  
+    - route:  cqrs-products.apps.sandbox.cflab01.in.hclcnlabs.com  
    instances: 1
    memory: 750M
